@@ -42,27 +42,54 @@ class ManualLabeler(tk.Tk):
         self.setup_ui()
         
         if not self.df.empty:
-            self.show_sample(0)
+            # Jump to first unlabeled
+            unlabeled = self.df.index[self.df['unit_id'] == -1].tolist()
+            if unlabeled:
+                self.current_index = unlabeled[0]
+            else:
+                self.current_index = 0
+            self.show_sample(self.current_index)
             
     def load_data(self):
-        # Prefer labeled, fallback to raw
+        df_labeled = pd.DataFrame()
         if os.path.exists(DATASET_FILE):
-            print(f"Loading {DATASET_FILE}")
-            df = pd.read_csv(DATASET_FILE)
-        elif os.path.exists(RAW_FILE):
-            print(f"Loading {RAW_FILE}")
-            df = pd.read_csv(RAW_FILE)
-            df['unit_id'] = -1
-        else:
+             print(f"Loading {DATASET_FILE}")
+             df_labeled = pd.read_csv(DATASET_FILE)
+        
+        df_raw = pd.DataFrame()
+        if os.path.exists(RAW_FILE):
+             print(f"Loading {RAW_FILE}")
+             df_raw = pd.read_csv(RAW_FILE)
+             
+        if df_labeled.empty and df_raw.empty:
             messagebox.showerror("Error", "No dataset found!")
             return pd.DataFrame()
             
+        if df_labeled.empty:
+            df = df_raw
+            df['unit_id'] = -1
+        elif df_raw.empty:
+            df = df_labeled
+        else:
+            # Merge
+            # Find timestamps in raw that are not in labeled
+            existing_timestamps = set(df_labeled['timestamp'].values)
+            new_rows = df_raw[~df_raw['timestamp'].isin(existing_timestamps)].copy()
+            
+            if not new_rows.empty:
+                print(f"Found {len(new_rows)} new actions in raw file.")
+                new_rows['unit_id'] = -1
+                df = pd.concat([df_labeled, new_rows], ignore_index=True)
+            else:
+                df = df_labeled
+                
         # Ensure unit_id column exists
         if 'unit_id' not in df.columns:
             df['unit_id'] = -1
             
         # Prioritize showing -1 (unlabeled) first?
-        # Maybe toggle? For now just sequential.
+        # Sort so -1 comes first, but keep timestamp order for context?
+        # Maybe just jump to first -1.
         return df
 
     def setup_ui(self):

@@ -10,8 +10,8 @@ from dataset import ClashRoyaleDataset
 # Configuration
 DATA_DIR = "images"
 CSV_FILE = "dataset/labeled_actions.csv"
-BATCH_SIZE = 4
-EPOCHS = 20 # Small epochs for testing
+BATCH_SIZE = 8 # Increase batch size slightly
+EPOCHS = 50 
 LR = 0.001
 NUM_CLASSES = 10 # 0-9
 
@@ -49,6 +49,7 @@ class ActionRecognitionModel(nn.Module):
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu") # Force CPU for debugging
     print(f"Using device: {device}")
     
     # Transforms

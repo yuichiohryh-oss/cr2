@@ -15,6 +15,9 @@ class ClashRoyaleDataset(Dataset):
                 on a sample.
         """
         self.annotations = pd.read_csv(csv_file)
+        # Filter out unlabeled (-1)
+        self.annotations = self.annotations[self.annotations['unit_id'] != -1].reset_index(drop=True)
+        
         self.root_dir = root_dir
         self.transform = transform
         
