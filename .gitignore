@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.gemini/
+.agent/
+images/*.jpg
+!images/.keep
+dataset/card_images/
+clusters.png
+model1.pth
+# Keep CSVs for now as they are the dataset
