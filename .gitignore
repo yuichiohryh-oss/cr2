@@ -8,4 +8,5 @@ images/*.jpg
 dataset/card_images/
 clusters.png
 model1.pth
+verification_results/
 # Keep CSVs for now as they are the dataset
